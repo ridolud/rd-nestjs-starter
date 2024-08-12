@@ -82,7 +82,7 @@ describe('AuthController', () => {
 
     const configService = module.get<ConfigService>(ConfigService);
     origin = configService.get<string>('domain');
-    cookieName = configService.get<string>('REFRESH_COOKIE');
+    cookieName = configService.get<string>('cookie_refresh');
   });
 
   it('should be defined', () => {
