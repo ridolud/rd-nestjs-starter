@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
-import { User } from '@prisma/client';
+import { $Enums, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
@@ -46,6 +46,7 @@ describe('UsersService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
+    role: $Enums.UserRole.USER
   };
 
   const dummyUser2: User = {
@@ -55,6 +56,7 @@ describe('UsersService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
+    role: $Enums.UserRole.USER
   };
 
   it('should be defined', () => {

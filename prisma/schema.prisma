@@ -19,7 +19,13 @@ model User {
   name String
   email String  @unique
   password String
-  confirmed Boolean @default(false) 
+  confirmed Boolean @default(false)
+  role  UserRole
 
   @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }

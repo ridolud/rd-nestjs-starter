@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '@prisma/client';
+import { $Enums, User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
+import { IsEnum } from 'class-validator';
 
 export class ResponseUserDto implements User {
+  
   @ApiProperty()
   name: string;
 
@@ -20,4 +22,7 @@ export class ResponseUserDto implements User {
 
   @ApiProperty()
   confirmed: boolean;
+
+  @IsEnum($Enums.UserRole)
+  role: $Enums.UserRole;
 }

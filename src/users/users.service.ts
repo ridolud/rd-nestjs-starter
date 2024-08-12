@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { $Enums, Prisma, User } from '@prisma/client';
 import defu from 'defu';
 import { compare, hash } from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -39,6 +39,7 @@ export class UsersService {
         name: input.name.toLowerCase(),
         email: input.email.toLowerCase(),
         password: await hash(input.password, 10),
+        role: $Enums.UserRole.USER
       },
     });
   }
@@ -60,12 +61,14 @@ export class UsersService {
     id: string,
     input: {
       name?: string;
+      role?: $Enums.UserRole
     },
   ): Promise<User> {
     return await this.prismaService.user.update({
       where: { id },
       data: {
         name: input.name,
+        role: input.role
       },
     });
   }
