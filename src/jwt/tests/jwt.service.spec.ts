@@ -57,8 +57,8 @@ describe('JwtService', () => {
       expect(decoded).toBeDefined();
       expect(decoded.id).toEqual(mockUser1.id);
       expect(decoded.sub).toEqual(mockUser1.email);
-      expect(decoded.aud).toEqual(process.env.DOMAIN);
-      expect(decoded.iss).toEqual(process.env.DOMAIN);
+      expect(decoded.aud).toEqual(config().domain);
+      expect(decoded.iss).toEqual(config().domain);
       expect(decoded.iat).toBeDefined();
       expect(decoded.exp).toBeDefined();
     });
@@ -76,11 +76,11 @@ describe('JwtService', () => {
           id: mockUser1.id,
           version: 1,
         },
-        process.env.JWT_CONFIRMATION_SECRET,
+        config().jwt.confirmation.secret,
         {
           expiresIn: 1,
-          issuer: process.env.DOMAIN,
-          audience: process.env.DOMAIN,
+          issuer: config().domain,
+          audience: config().domain,
           subject: mockUser1.email,
         },
       );
@@ -113,8 +113,8 @@ describe('JwtService', () => {
       expect(decoded.id).toEqual(mockUser1.id);
       expect(decoded.tokenId).toBeDefined();
       expect(decoded.sub).toEqual(mockUser1.email);
-      expect(decoded.aud).toEqual(process.env.DOMAIN);
-      expect(decoded.iss).toEqual(process.env.DOMAIN);
+      expect(decoded.aud).toEqual(config().domain);
+      expect(decoded.iss).toEqual(config().domain);
       expect(decoded.iat).toBeDefined();
       expect(decoded.exp).toBeDefined();
     });
@@ -147,8 +147,8 @@ describe('JwtService', () => {
       expect(decoded).toBeDefined();
       expect(decoded.id).toEqual(mockUser1.id);
       expect(decoded.sub).toEqual(mockUser1.email);
-      expect(decoded.aud).toEqual(process.env.DOMAIN);
-      expect(decoded.iss).toEqual(process.env.DOMAIN);
+      expect(decoded.aud).toEqual(config().domain);
+      expect(decoded.iss).toEqual(config().domain);
       expect(decoded.iat).toBeDefined();
       expect(decoded.exp).toBeDefined();
     });

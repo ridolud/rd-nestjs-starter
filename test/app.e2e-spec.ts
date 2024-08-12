@@ -28,7 +28,7 @@ describe('AppController (e2e)', () => {
     email: faker.internet.email().toLowerCase(),
     createdAt: new Date(),
     confirmed: true,
-    role: 'USER'
+    role: 'USER',
   };
 
   beforeEach(async () => {
@@ -46,7 +46,7 @@ describe('AppController (e2e)', () => {
     jest.spyOn(mailService, 'sendEmail').mockImplementation();
 
     const configService = app.get(ConfigService);
-    app.use(cookieParser(configService.get<string>('COOKIE_SECRET')));
+    app.use(cookieParser(configService.get<string>('cookie_secret')));
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,

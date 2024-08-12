@@ -18,7 +18,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api');
   app.enableCors();
-  app.use(cookieParser(configService.get('COOKIE_SECRET')));
+  app.use(cookieParser(configService.get('cookie_secret')));
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaExceptionFilter(httpAdapter));

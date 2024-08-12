@@ -49,7 +49,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
   ) {
-    this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
+    this.cookieName = this.configService.get<string>('cookie_refresh');
     this.refreshTime = this.configService.get<number>('jwt.refresh.time');
     this.testing = this.configService.get<boolean>('testing');
   }

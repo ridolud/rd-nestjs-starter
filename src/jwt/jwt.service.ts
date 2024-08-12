@@ -30,8 +30,8 @@ export class JwtService {
 
   constructor(private readonly configService: ConfigService) {
     this.config = this.configService.get<IJwt>('jwt');
-    this.issuer = this.configService.get('DOMAIN');
-    this.domain = this.configService.get('DOMAIN');
+    this.issuer = this.configService.get('domain');
+    this.domain = this.configService.get('domain');
   }
 
   private static async generateTokenAsync(

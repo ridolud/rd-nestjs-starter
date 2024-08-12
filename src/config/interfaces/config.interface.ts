@@ -9,4 +9,6 @@ export interface IConfig {
   jwt: IJwt;
   redis: RedisOptions;
   emailService: IEmailConfig;
+  cookie_secret: string;
+  cookie_refresh: string;
 }
