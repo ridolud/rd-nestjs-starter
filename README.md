@@ -3,7 +3,7 @@
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository. includes:
 
 - app config
-- base atuh
+- base auth
 - base test
 - base mail service
 - base jwt config
@@ -14,6 +14,10 @@
 
 ```bash
 $ pnpm install
+```
+
+```bash
+$ pnpx prisma generate
 ```
 
 ## Running the app
