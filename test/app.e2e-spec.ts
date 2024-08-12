@@ -181,6 +181,101 @@ describe('AppController (e2e)', () => {
         });
       });
     });
+
+    describe('sign-in', () => {
+      const signInUrl = `${baseUrl}/sign-in`;
+
+      it('should throw 400 error if email or username is missing', async () => {
+        jest
+          .spyOn(prismaService.user, 'findFirst')
+          .mockRejectedValueOnce(new Error());
+
+        await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            password: mockUser.password,
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should throw 400 error if password is missing', async () => {
+        jest
+          .spyOn(prismaService.user, 'findFirst')
+          .mockRejectedValueOnce(new Error());
+
+        await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            email: mockUser.email,
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should throw 400 error if email is invalid', async () => {
+        jest
+          .spyOn(prismaService.user, 'findFirst')
+          .mockRejectedValueOnce(new Error());
+
+        await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            email: 'test@test',
+            password: mockUser.password,
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should throw 401 error if user is not confirmed', async () => {
+        jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce({
+          ...mockUser,
+          password: await hash(mockUser.password, 10),
+          confirmed: false,
+        });
+
+        await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            email: mockUser.email,
+            password: mockUser.password,
+          })
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+
+      it('should throw 401 error if password is incorrect', async () => {
+        jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce({
+          ...mockUser,
+          password: await hash(mockUser.password, 10),
+        });
+
+        await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            email: mockUser.email,
+            password: faker.internet.password(10),
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should sign in the user with email', async () => {
+        jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce({
+          ...mockUser,
+          password: await hash(mockUser.password, 10),
+        });
+
+        const response = await request(app.getHttpServer())
+          .post(signInUrl)
+          .send({
+            email: mockUser.email,
+            password: mockUser.password,
+          })
+          .expect(HttpStatus.OK);
+
+        expect(response.body).toMatchObject({
+          user: expect.any(Object),
+          accessToken: expect.any(String),
+        });
+      });
+    });
   });
 
   afterAll(async () => {
