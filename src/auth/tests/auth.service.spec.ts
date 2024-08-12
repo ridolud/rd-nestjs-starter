@@ -3,7 +3,7 @@ import { CacheModule, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { BadRequestException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
-import { User } from '@prisma/client';
+import { $Enums, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Cache } from 'cache-manager';
 import { isUUID, isJWT } from 'class-validator';
@@ -66,6 +66,7 @@ describe('AuthService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
+    role: $Enums.UserRole.USER
   };
 
   it('should be defined', () => {

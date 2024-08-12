@@ -19,7 +19,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Cache } from 'cache-manager';
 import { plainToInstance } from 'class-transformer';
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';

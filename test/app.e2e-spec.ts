@@ -28,6 +28,7 @@ describe('AppController (e2e)', () => {
     email: faker.internet.email().toLowerCase(),
     createdAt: new Date(),
     confirmed: true,
+    role: 'USER'
   };
 
   beforeEach(async () => {

@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { AllowRole } from 'src/auth/decorators/allow-role.decorator';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { FindUserDto } from 'src/users/dto/find-user.dto';
 import { ResponseFindUsersDto } from 'src/users/dto/response-find-users.dto';
@@ -27,6 +28,7 @@ import { UsersService } from 'src/users/users.service';
 import { ResponseErrorDto } from 'src/utils/dto/response-error.dto';
 
 @ApiTags('Users')
+@AllowRole('ADMIN')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

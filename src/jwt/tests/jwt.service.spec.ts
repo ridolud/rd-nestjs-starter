@@ -33,6 +33,7 @@ describe('JwtService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
+    role: 'USER',
   };
 
   it('should be defined', () => {

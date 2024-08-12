@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
-import { User } from '@prisma/client';
+import { $Enums, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { AuthController } from 'src/auth/auth.controller';
@@ -37,6 +37,7 @@ describe('AuthController', () => {
     email: faker.internet.email().toLowerCase(),
     createdAt: new Date(),
     confirmed: true,
+    role: $Enums.UserRole.USER
   };
 
   beforeAll(async () => {
