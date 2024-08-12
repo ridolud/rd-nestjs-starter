@@ -37,7 +37,7 @@ describe('AuthController', () => {
     email: faker.internet.email().toLowerCase(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   beforeAll(async () => {
@@ -49,14 +49,9 @@ describe('AuthController', () => {
         }),
         CacheModule.register({
           isGlobal: true,
-          ttl: parseInt(process.env.JWT_REFRESH_TIME, 10),
         }),
         JwtModule,
         MailModule,
-        //   ThrottlerModule.forRootAsync({
-        //     imports: [ConfigModule],
-        //     useClass: ThrottlerConfig,
-        //   }),
       ],
       controllers: [AuthController],
       providers: [

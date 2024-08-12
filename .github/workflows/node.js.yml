@@ -5,13 +5,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -40,6 +39,6 @@ jobs:
 
       - name: Unit test
         run: pnpm test
-        
+
       - name: e2e Test
         run: pmpm test:e2e
