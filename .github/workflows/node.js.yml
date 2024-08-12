@@ -33,6 +33,8 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+      - name: Generte Prisma
+        run: pnpx prisma generate
 
       - name: Install dependencies
         run: pnpm install
