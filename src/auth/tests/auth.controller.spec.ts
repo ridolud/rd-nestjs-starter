@@ -270,16 +270,17 @@ describe('AuthController', () => {
   });
 
   describe('forgot password', () => {
-    it('should trow a NotFoundException if user does not exists', async () => {
+    it('should return event user does not exists', async () => {
       jest
         .spyOn(prismaServiceMock.user, 'findFirstOrThrow')
         .mockRejectedValueOnce(new Error());
 
-      await expect(
-        controller.forgotPassword(origin, {
-          email: faker.internet.email(),
-        }),
-      ).rejects.toThrow();
+      const message = await controller.forgotPassword(origin, {
+        email: faker.internet.email(),
+      });
+      expect(message).toBeDefined();
+      expect(message.message).toBe('Reset password email sent');
+      expect(mailService.sendResetPasswordEmail).not.toHaveBeenCalled();
     });
 
     it('should send an email if user exists', async () => {

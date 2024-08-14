@@ -137,16 +137,21 @@ export class AuthService {
     input: EmailDto,
     domain?: string,
   ): Promise<void> {
-    const user = await this.usersService.findOneByEmail(input.email);
-    if (!user) throw new NotFoundException('user not found!');
+    try {
+      const user = await this.usersService.findOneByEmail(input.email);
+      if (!user) return;
 
-    const resetToken = await this.jwtService.generateToken(
-      user,
-      TokenTypeEnum.RESET_PASSWORD,
-      domain,
-    );
+      const resetToken = await this.jwtService.generateToken(
+        user,
+        TokenTypeEnum.RESET_PASSWORD,
+        domain,
+      );
 
-    this.mailService.sendResetPasswordEmail(user, resetToken);
+      this.mailService.sendResetPasswordEmail(user, resetToken);
+      return;
+    } catch (_) {
+      return;
+    }
   }
 
   public async resetPassword(input: ResetPasswordDto): Promise<void> {

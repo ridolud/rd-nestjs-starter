@@ -277,6 +277,105 @@ describe('AppController (e2e)', () => {
         });
       });
     });
+
+    describe('logout', () => {
+      const logoutUrl = `${baseUrl}/logout`;
+
+      it('should throw 401 if user is not signed in', async () => {
+        await request(app.getHttpServer())
+          .post(logoutUrl)
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+
+      it('should logout the user', async () => {
+        jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce({
+          ...mockUser,
+          password: await hash(mockUser.password, 10),
+        });
+
+        jest
+          .spyOn(prismaService.user, 'findUniqueOrThrow')
+          .mockResolvedValueOnce({
+            ...mockUser,
+            password: await hash(mockUser.password, 10),
+          });
+
+        const signInRes = await request(app.getHttpServer())
+          .post(`${baseUrl}/sign-in`)
+          .send({
+            email: mockUser.email,
+            password: mockUser.password,
+          })
+          .expect(HttpStatus.OK);
+
+        await request(app.getHttpServer())
+          .post(logoutUrl)
+          .set('Authorization', `Bearer ${signInRes.body.accessToken}`)
+          .set('Cookie', signInRes.header['set-cookie'])
+          .expect(HttpStatus.OK);
+      });
+    });
+
+    describe('forgot-password', () => {
+      const forgotPasswordUrl = `${baseUrl}/forgot-password`;
+
+      it('should throw 400 if email is missing', async () => {
+        await request(app.getHttpServer())
+          .post(forgotPasswordUrl)
+          .send({})
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should throw 400 if email is invalid', async () => {
+        await request(app.getHttpServer())
+          .post(forgotPasswordUrl)
+          .send({
+            email: 'test@test',
+          })
+          .expect(HttpStatus.BAD_REQUEST);
+      });
+
+      it('should throw 200 even if user is not found', async () => {
+        jest
+          .spyOn(prismaService.user, 'findFirstOrThrow')
+          .mockRejectedValueOnce(new Error());
+        jest.spyOn(mailService, 'sendResetPasswordEmail').mockImplementation();
+
+        const response = await request(app.getHttpServer())
+          .post(forgotPasswordUrl)
+          .send({
+            email: faker.internet.email().toLowerCase(),
+          })
+          .expect(HttpStatus.CREATED);
+
+        expect(response.body).toMatchObject({
+          message: 'Reset password email sent',
+        });
+
+        expect(mailService.sendResetPasswordEmail).not.toHaveBeenCalled();
+      });
+
+      it('should send forgot password email', async () => {
+        jest
+          .spyOn(prismaService.user, 'findFirstOrThrow')
+          .mockResolvedValueOnce({
+            ...mockUser,
+            password: await hash(mockUser.password, 10),
+          });
+        jest.spyOn(mailService, 'sendResetPasswordEmail').mockImplementation();
+
+        const response = await request(app.getHttpServer())
+          .post(forgotPasswordUrl)
+          .send({
+            email: mockUser.email,
+          })
+          .expect(HttpStatus.CREATED);
+        expect(response.body).toMatchObject({
+          message: 'Reset password email sent',
+        });
+        expect(mailService.sendResetPasswordEmail).toHaveBeenCalled();
+      });
+    });
   });
 
   afterAll(async () => {
