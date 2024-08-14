@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: test
 
     strategy:
       matrix:
@@ -34,7 +35,9 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Generte Prisma
-        run: pnpx prisma generate
+        run: pnpx db push
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Install dependencies
         run: pnpm install
