@@ -8,7 +8,7 @@ export class GraphQLDriverOptions implements ApolloDriverConfigFactory {
 
   createGqlOptions(): Omit<ApolloDriverConfig, 'driver'> {
     return {
-      autoSchemaFile: 'schema.gql',
+      autoSchemaFile: 'gql/schema.gql',
       playground: this.configService.get('testing')
         ? {
             settings: {
