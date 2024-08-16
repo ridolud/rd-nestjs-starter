@@ -7,7 +7,7 @@
 - base test
 - base mail service
 - base jwt config
-- base swagger config
+- base graphql(appolo driver)
 - minimal prisma setup
 
 ## Installation
