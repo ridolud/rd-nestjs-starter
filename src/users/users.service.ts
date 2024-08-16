@@ -10,8 +10,6 @@ export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async find(options: FindUserDto): Promise<[number, User[]]> {
-    options = defu(options, { take: 20, skip: 0, search: '' });
-
     const query: Prisma.UserWhereInput = {
       OR: [
         { email: { contains: options.search, mode: 'insensitive' } },
@@ -39,7 +37,7 @@ export class UsersService {
         name: input.name.toLowerCase(),
         email: input.email.toLowerCase(),
         password: await hash(input.password, 10),
-        role: $Enums.UserRole.USER
+        role: $Enums.UserRole.USER,
       },
     });
   }
@@ -61,14 +59,14 @@ export class UsersService {
     id: string,
     input: {
       name?: string;
-      role?: $Enums.UserRole
+      role?: $Enums.UserRole;
     },
   ): Promise<User> {
     return await this.prismaService.user.update({
       where: { id },
       data: {
         name: input.name,
-        role: input.role
+        role: input.role,
       },
     });
   }

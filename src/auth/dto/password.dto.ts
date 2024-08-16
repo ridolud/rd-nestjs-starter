@@ -1,10 +1,10 @@
+import { Field, InputType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength } from 'class-validator';
 
+@InputType()
 export class PasswordDto {
-  @ApiProperty({
-    example: 'password',
-  })
+  @Field()
   @IsString()
   @MinLength(8)
   password: string;

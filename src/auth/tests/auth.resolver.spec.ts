@@ -5,7 +5,6 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { $Enums, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { randomUUID } from 'crypto';
-import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
 import { config } from 'src/config';
 import { JwtModule } from 'src/jwt/jwt.module';
@@ -21,12 +20,13 @@ import { createResponseMock } from 'src/utils/mocks/response.mock';
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 import { prismaServiceMock } from 'src/utils/mocks/prisma.mocks';
 import { HttpStatus } from '@nestjs/common';
+import { AuthResolver } from 'src/auth/auth.resolver';
 
-describe('AuthController', () => {
+describe('Authresolver', () => {
   let module: TestingModule,
     mailService: MailService,
     jwtService: JwtService,
-    controller: AuthController,
+    resolver: AuthResolver,
     origin: string,
     cookieName: string;
 
@@ -53,17 +53,17 @@ describe('AuthController', () => {
         JwtModule,
         MailModule,
       ],
-      controllers: [AuthController],
       providers: [
         AuthService,
         UsersService,
+        AuthResolver,
         { provide: PrismaService, useValue: prismaServiceMock },
       ],
     }).compile();
 
     mailService = module.get<MailService>(MailService);
     jwtService = module.get<JwtService>(JwtService);
-    controller = module.get<AuthController>(AuthController);
+    resolver = module.get<AuthResolver>(AuthResolver);
 
     jest.spyOn(mailService, 'sendEmail').mockImplementation();
     jest.spyOn(mailService, 'sendResetPasswordEmail').mockImplementation();
@@ -104,7 +104,7 @@ describe('AuthController', () => {
         password: await hash(password, 10),
       });
 
-      const message = await controller.signUp(origin, {
+      const message = await resolver.signUp(origin, {
         name,
         email,
         password,
@@ -120,7 +120,7 @@ describe('AuthController', () => {
         .mockRejectedValueOnce(new Error('Email already registered!'));
 
       await expect(
-        controller.signUp(origin, {
+        resolver.signUp(origin, {
           email: mockUser.email,
           name: mockUser.name,
           password: mockUser.password,
@@ -134,7 +134,7 @@ describe('AuthController', () => {
 
     it('should throw a BadRequestException if the token is invalid', async () => {
       await expect(
-        controller.confirmEmail(
+        resolver.confirmEmail(
           origin,
           {
             confirmationToken: 'invalid',
@@ -154,9 +154,8 @@ describe('AuthController', () => {
         mockUser,
         TokenTypeEnum.CONFIRMATION,
       );
-      await controller.confirmEmail(origin, { confirmationToken: token }, res);
+      await resolver.confirmEmail(origin, { confirmationToken: token }, res);
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     });
   });
 
@@ -169,7 +168,7 @@ describe('AuthController', () => {
         .mockResolvedValueOnce(null);
 
       await expect(
-        controller.signIn(res, origin, {
+        resolver.signIn(res, origin, {
           email: faker.internet.email(),
           password: mockUser.password,
         }),
@@ -178,7 +177,7 @@ describe('AuthController', () => {
 
     it('should throw a invalid credentials if password is wrong', async () => {
       await expect(
-        controller.signIn(res, origin, {
+        resolver.signIn(res, origin, {
           email: mockUser.email,
           password: faker.internet.password(),
         }),
@@ -186,12 +185,11 @@ describe('AuthController', () => {
     });
 
     it('should sign in user', async () => {
-      await controller.signIn(res, origin, {
+      await resolver.signIn(res, origin, {
         email: mockUser.email,
         password: mockUser.password,
       });
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
     });
 
     it('should throw an UnauthorizedException if the user is not confirmed', async () => {
@@ -202,7 +200,7 @@ describe('AuthController', () => {
       });
 
       await expect(
-        controller.signIn(res, origin, {
+        resolver.signIn(res, origin, {
           email: mockUser.email,
           password: mockUser.password,
         }),
@@ -215,14 +213,14 @@ describe('AuthController', () => {
     const res = createResponseMock();
 
     it('should throw a UnauthorizedException if there is no token', async () => {
-      await expect(controller.refreshAccess(req, res)).rejects.toThrow(
+      await expect(resolver.refreshAccess(req, res)).rejects.toThrow(
         'Unauthorized',
       );
     });
 
     it('should throw a UnauthorizedException if the token is invalid', async () => {
       req.setCookie(cookieName, 'invalid');
-      await expect(controller.refreshAccess(req, res)).rejects.toThrow(
+      await expect(resolver.refreshAccess(req, res)).rejects.toThrow(
         'Invalid token',
       );
     });
@@ -234,11 +232,11 @@ describe('AuthController', () => {
       );
 
       req.setCookie(cookieName, token);
-      await controller.refreshAccess(req, res);
+      const result = await resolver.refreshAccess(req, res);
 
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toBeDefined();
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.send).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
     });
   });
 
@@ -247,14 +245,12 @@ describe('AuthController', () => {
     const res = createResponseMock();
 
     it('should throw a UnauthorizedException if there is no token', async () => {
-      await expect(controller.logout(req, res)).rejects.toThrow('Unauthorized');
+      await expect(resolver.logout(req, res)).rejects.toThrow('Unauthorized');
     });
 
     it('should throw a UnauthorizedException if the token is invalid', async () => {
       req.setCookie(cookieName, 'invalid');
-      await expect(controller.logout(req, res)).rejects.toThrow(
-        'Invalid token',
-      );
+      await expect(resolver.logout(req, res)).rejects.toThrow('Invalid token');
     });
 
     it('should logout user', async () => {
@@ -263,9 +259,8 @@ describe('AuthController', () => {
         TokenTypeEnum.REFRESH,
       );
       req.setCookie(cookieName, token);
-      await controller.logout(req, res);
+      await resolver.logout(req, res);
       expect(res.clearCookie).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     });
   });
 
@@ -275,7 +270,7 @@ describe('AuthController', () => {
         .spyOn(prismaServiceMock.user, 'findFirstOrThrow')
         .mockRejectedValueOnce(new Error());
 
-      const message = await controller.forgotPassword(origin, {
+      const message = await resolver.forgotPassword(origin, {
         email: faker.internet.email(),
       });
       expect(message).toBeDefined();
@@ -284,7 +279,7 @@ describe('AuthController', () => {
     });
 
     it('should send an email if user exists', async () => {
-      const message = await controller.forgotPassword(origin, {
+      const message = await resolver.forgotPassword(origin, {
         email: mockUser.email,
       });
       expect(message).toBeDefined();
@@ -297,7 +292,7 @@ describe('AuthController', () => {
     it('should throw a BadRequestException if the token is invalid', async () => {
       const password = faker.internet.password();
       await expect(
-        controller.resetPassword({
+        resolver.resetPassword({
           resetToken: 'invalid',
           newPassword: password,
         }),
@@ -309,7 +304,7 @@ describe('AuthController', () => {
         mockUser,
         TokenTypeEnum.RESET_PASSWORD,
       );
-      const message = await controller.resetPassword({
+      const message = await resolver.resetPassword({
         resetToken: token,
         newPassword: faker.internet.password(),
       });
@@ -323,7 +318,7 @@ describe('AuthController', () => {
 
     it('should change the password', async () => {
       const newPassword = faker.internet.password();
-      await controller.updatePassword(
+      await resolver.updatePassword(
         mockUser.id,
         origin,
         {
@@ -332,14 +327,12 @@ describe('AuthController', () => {
         res,
       );
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalled();
     });
   });
 
   describe('me', () => {
     it('should get a user', async () => {
-      const user = await controller.getMe(mockUser.id);
+      const user = await resolver.getMe(mockUser.id);
       expect(user.id).toBeDefined();
     });
   });

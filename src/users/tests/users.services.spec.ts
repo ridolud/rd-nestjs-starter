@@ -5,25 +5,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
 import { compare, hash } from 'bcrypt';
+import { prismaServiceMock } from 'src/utils/mocks/prisma.mocks';
 
 describe('UsersService', () => {
   let module: TestingModule;
   let service: UsersService;
-  const prismaServiceMock = {
-    user: {
-      findFirstOrThrow: jest.fn(),
-      findUniqueOrThrow: jest.fn(),
-      findMany: jest.fn(),
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      delete: jest.fn(),
-      update: jest.fn(),
-      count: jest.fn(),
-    },
-    $transaction: jest
-      .fn()
-      .mockImplementation((callback) => callback(prismaServiceMock)),
-  };
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -46,7 +32,7 @@ describe('UsersService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   const dummyUser2: User = {
@@ -56,7 +42,7 @@ describe('UsersService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   it('should be defined', () => {
@@ -86,7 +72,11 @@ describe('UsersService', () => {
         [dummyUser1, dummyUser2],
       ]);
 
-      const [total, records] = await service.find({});
+      const [total, records] = await service.find({
+        skip: 0,
+        take: 20,
+        search: '',
+      });
       expect(total).toEqual(2);
       expect(records).toEqual([dummyUser1, dummyUser2]);
     });

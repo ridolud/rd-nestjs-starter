@@ -1,9 +1,10 @@
 import { createParamDecorator } from '@nestjs/common';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import { User } from '@prisma/client';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 export const CurrentUser = createParamDecorator(
   (_, context: ExecutionContextHost): number | undefined => {
-    return context.switchToHttp().getRequest()?.user;
+    const ctx = GqlExecutionContext.create(context);
+    return ctx.getContext().req.user;
   },
 );

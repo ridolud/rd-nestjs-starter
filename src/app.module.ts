@@ -9,6 +9,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { JwtModule } from 'src/jwt/jwt.module';
 import { MailModule } from 'src/mail/mail.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLDriverOptions } from 'src/config/graphql.config';
 
 @Module({
   imports: [
@@ -21,6 +24,11 @@ import { MailModule } from 'src/mail/mail.module';
     AuthModule,
     JwtModule,
     MailModule,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      imports: [ConfigModule],
+      useClass: GraphQLDriverOptions,
+    }),
     UsersModule,
   ],
   providers: [

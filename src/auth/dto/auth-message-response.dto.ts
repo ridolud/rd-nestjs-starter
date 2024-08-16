@@ -1,10 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Field, ObjectType } from '@nestjs/graphql';
 
+@ObjectType()
 export class AuthMessageResponseDto {
-  @ApiProperty({
-    description: 'Message',
-    example: 'Hello World',
-    type: String,
-  })
+  @Field()
   public message: string;
 }

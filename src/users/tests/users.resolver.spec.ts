@@ -4,13 +4,13 @@ import { $Enums, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
-import { UsersController } from 'src/users/users.controller';
 import { plainToInstance } from 'class-transformer';
 import { ResponseUserDto } from 'src/users/dto/response-user.dto';
+import { UsersResolver } from 'src/users/users.resolver';
 
-describe('UsersController', () => {
+describe('UsersResolver', () => {
   let module: TestingModule;
-  let controller: UsersController;
+  let resolver: UsersResolver;
   let service: UsersService;
   const prismaServiceMock = {
     user: {
@@ -29,9 +29,9 @@ describe('UsersController', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      controllers: [UsersController],
       providers: [
         UsersService,
+        UsersResolver,
         {
           provide: PrismaService,
           useValue: prismaServiceMock,
@@ -40,7 +40,7 @@ describe('UsersController', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    controller = module.get<UsersController>(UsersController);
+    resolver = module.get<UsersResolver>(UsersResolver);
   });
 
   const mockUser1: User = {
@@ -50,7 +50,7 @@ describe('UsersController', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   const mockUser2: User = {
@@ -60,7 +60,7 @@ describe('UsersController', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   it('should be defined', () => {
@@ -72,7 +72,7 @@ describe('UsersController', () => {
     it('should create a user', async () => {
       prismaServiceMock.user.create.mockResolvedValueOnce(mockUser1);
 
-      const user = await controller.create(mockUser1);
+      const user = await resolver.createUser(mockUser1);
       expect(user).toBeDefined();
     });
 
@@ -90,12 +90,18 @@ describe('UsersController', () => {
         [mockUser1, mockUser2],
       ]);
 
-      const users = await controller.find({});
+      const users = await resolver.users({ take: 20, skip: 0, search: '' });
       expect(users.total).toEqual(2);
       expect(users.records).toEqual([
         plainToInstance(ResponseUserDto, mockUser1),
         plainToInstance(ResponseUserDto, mockUser2),
       ]);
+    });
+
+    it('should get a user', async () => {
+      prismaServiceMock.user.findUniqueOrThrow.mockResolvedValueOnce(mockUser1);
+
+      await expect(resolver.user(mockUser1.id)).resolves.toBeDefined();
     });
   });
 
@@ -105,7 +111,7 @@ describe('UsersController', () => {
         ...mockUser2,
         id: mockUser1.id,
       });
-      const user = await controller.update(mockUser1.id, {
+      const user = await resolver.updateUser(mockUser1.id, {
         email: mockUser2.email,
         name: mockUser2.name,
         password: mockUser2.password,
@@ -117,7 +123,7 @@ describe('UsersController', () => {
   describe('delete', () => {
     it('should delete a user', async () => {
       prismaServiceMock.user.delete.mockResolvedValueOnce(mockUser1);
-      const user = await controller.delete(mockUser1.id);
+      const user = await resolver.deleteUser(mockUser1.id);
       expect(user).toBeDefined();
     });
   });

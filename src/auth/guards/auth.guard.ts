@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { UserRole } from '@prisma/client';
 import { isJWT } from 'class-validator';
 import { Request } from 'express';
@@ -35,9 +36,9 @@ export class AuthGuard implements CanActivate {
       ALLOW_ROLE_KEY,
       [context.getHandler(), context.getClass()],
     );
-
+    const ctx = GqlExecutionContext.create(context);
     const isAuteticated = await this.setHttpHeader(
-      context.switchToHttp().getRequest(),
+      ctx.getContext().req,
       isPublic,
       allowRoles,
     );

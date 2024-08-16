@@ -14,28 +14,16 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  app.use(helmet());
+  app.use(
+    helmet({ contentSecurityPolicy: !config().testing ? undefined : false }),
+  );
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api');
   app.enableCors();
   app.use(cookieParser(configService.get('cookie_secret')));
 
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new PrismaExceptionFilter(httpAdapter));
-
+  app.useGlobalFilters(new PrismaExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('NestJs Boilerplate')
-    .setDescription('An boilerplate project')
-    .setVersion('0.0.1')
-    .addBearerAuth({
-      name: 'authorization',
-      type: 'apiKey',
-    })
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(
     configService.get<number>('port'),

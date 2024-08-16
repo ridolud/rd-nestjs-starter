@@ -1,59 +1,28 @@
 import {
-  ArgumentsHost,
   Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpServer,
-  HttpStatus,
+  ConflictException,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
-import { BaseExceptionFilter } from '@nestjs/core';
+import { GqlExceptionFilter } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 
-export type ErrorCodesStatusMapping = {
-  [key: string]: number;
-};
-
 @Catch(Prisma.PrismaClientKnownRequestError)
-export class PrismaExceptionFilter extends BaseExceptionFilter {
-  private errorCodesStatusMapping: ErrorCodesStatusMapping = {
-    P2000: HttpStatus.BAD_REQUEST,
-    P2002: HttpStatus.CONFLICT,
-    P2025: HttpStatus.NOT_FOUND,
-  };
-
-  constructor(
-    applicationRef?: HttpServer,
-    errorCodesStatusMapping?: ErrorCodesStatusMapping,
-  ) {
-    super(applicationRef);
-
-    if (errorCodesStatusMapping) {
-      this.errorCodesStatusMapping = Object.assign(
-        this.errorCodesStatusMapping,
-        errorCodesStatusMapping,
-      );
-    }
-  }
-
-  catch(exception: any, host: ArgumentsHost) {
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      const statusCode = this.errorCodesStatusMapping[exception.code];
-      const message = `[${exception.code}]: ${this.exceptionShortMessage(exception.message)}`;
-
-      if (!Object.keys(this.errorCodesStatusMapping).includes(exception.code)) {
-        return super.catch(exception, host);
+export class PrismaExceptionFilter implements GqlExceptionFilter {
+  catch(exception: Prisma.PrismaClientKnownRequestError): any {
+    switch (exception.code) {
+      case 'P2002': {
+        throw new ConflictException('Not Unique Email');
       }
-
-      super.catch(new HttpException({ statusCode, message }, statusCode), host);
+      case 'P2003': {
+        throw new UnprocessableEntityException('Entity Not Exist');
+      }
+      case 'P2025': {
+        throw new NotFoundException('Cannot find');
+      }
+      default:
+        break;
     }
-  }
-
-  private exceptionShortMessage(message: string): string {
-    const shortMessage = message.substring(message.indexOf('→'));
-
-    return shortMessage
-      .substring(shortMessage.indexOf('\n'))
-      .replace(/\n/g, '')
-      .trim();
+    return exception;
   }
 }

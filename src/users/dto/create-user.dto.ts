@@ -1,19 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { $Enums } from '@prisma/client';
-import { IsString, IsOptional, Min, IsEmail, MinLength, IsEnum } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsString, IsEmail, MinLength } from 'class-validator';
 
+@InputType()
 export class CreateUserDto {
-  @ApiProperty({ type: String })
   @IsString()
   @MinLength(1)
+  @Field()
   name: string;
 
-  @ApiProperty({ type: String })
   @IsEmail()
+  @Field()
   email: string;
 
-  @ApiProperty({ type: String })
   @IsString()
   @MinLength(6)
+  @Field()
   password: string;
 }
