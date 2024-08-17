@@ -38,6 +38,12 @@ export function config(): IConfig {
         pass: process.env.EMAIL_PASSWORD,
       },
     },
+    throttler: [
+      {
+        ttl: parseInt(process.env.THROTTLE_TTL, 10),
+        limit: parseInt(process.env.THROTTLE_LIMIT, 10),
+      },
+    ],
     testing,
   };
 }

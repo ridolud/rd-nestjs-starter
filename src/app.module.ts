@@ -9,6 +9,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { JwtModule } from 'src/jwt/jwt.module';
 import { MailModule } from 'src/mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerConfig } from 'src/config/throttler.config';
 
 @Module({
   imports: [
@@ -17,6 +19,10 @@ import { MailModule } from 'src/mail/mail.module';
       isGlobal: true,
       imports: [ConfigModule],
       useClass: CacheConfig,
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ThrottlerConfig,
     }),
     AuthModule,
     JwtModule,
