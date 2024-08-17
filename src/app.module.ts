@@ -12,6 +12,8 @@ import { MailModule } from 'src/mail/mail.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLDriverOptions } from 'src/config/graphql.config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerConfig } from 'src/config/throttler.config';
 
 @Module({
   imports: [
@@ -21,14 +23,18 @@ import { GraphQLDriverOptions } from 'src/config/graphql.config';
       imports: [ConfigModule],
       useClass: CacheConfig,
     }),
-    AuthModule,
-    JwtModule,
-    MailModule,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ThrottlerConfig,
+    }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [ConfigModule],
       useClass: GraphQLDriverOptions,
     }),
+    AuthModule,
+    JwtModule,
+    MailModule,
     UsersModule,
   ],
   providers: [
