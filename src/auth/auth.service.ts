@@ -24,6 +24,7 @@ import { compare } from 'bcrypt';
 import { EmailDto } from 'src/auth/dto/email.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { PasswordDto } from 'src/auth/dto/password.dto';
+import { OAuthProviderType } from 'src/auth/oauth/types/oauth';
 
 @Injectable()
 export class AuthService {
@@ -102,6 +103,26 @@ export class AuthService {
     });
   }
 
+  public async signInWith(
+    provider: OAuthProviderType,
+    name: string,
+    email: string,
+  ): Promise<AuthResponseDto> {
+    const user = await this.usersService.findOrCreate({
+      email,
+      provider,
+      name,
+    });
+
+    const [accessToken, refreshToken] = await this.generateAuthTokens(user);
+
+    return plainToInstance(AuthResponseDto, {
+      user,
+      accessToken,
+      refreshToken,
+    });
+  }
+
   public async refreshTokenAccess(
     refreshToken: string,
     domain?: string,
@@ -120,7 +141,7 @@ export class AuthService {
     return plainToInstance(AuthResponseDto, {
       user,
       accessToken,
-      refreshToken,
+      refreshToken: newRefreshToken,
     });
   }
 

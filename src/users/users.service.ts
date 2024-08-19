@@ -4,6 +4,8 @@ import defu from 'defu';
 import { compare, hash } from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FindUserDto } from 'src/users/dto/find-user.dto';
+import { th } from '@faker-js/faker';
+import { OAuthProviderType } from 'src/auth/oauth/types/oauth';
 
 @Injectable()
 export class UsersService {
@@ -39,7 +41,7 @@ export class UsersService {
         name: input.name.toLowerCase(),
         email: input.email.toLowerCase(),
         password: await hash(input.password, 10),
-        role: $Enums.UserRole.USER
+        role: $Enums.UserRole.USER,
       },
     });
   }
@@ -57,18 +59,57 @@ export class UsersService {
     return user;
   }
 
+  async findOrCreate(input: {
+    provider: OAuthProviderType;
+    email: string;
+    name: string;
+    password?: string;
+  }): Promise<User> {
+    let user: User;
+    user = await this.prismaService.user.upsert({
+      where: { email: input.email.toLowerCase() },
+      update: {
+        oauthProviders: {
+          connectOrCreate: {
+            where: {
+              provider_email: {
+                provider: input.provider,
+                email: input.email.toLowerCase(),
+              },
+            },
+            create: {
+              provider: input.provider,
+            },
+          },
+        },
+      },
+      create: {
+        name: input.name.toLowerCase(),
+        email: input.email.toLowerCase(),
+        password: !input.password ? 'UNSET' : await hash(input.password, 10),
+        role: $Enums.UserRole.USER,
+        oauthProviders: {
+          create: {
+            provider: input.provider,
+          },
+        },
+      },
+    });
+    return user;
+  }
+
   async update(
     id: string,
     input: {
       name?: string;
-      role?: $Enums.UserRole
+      role?: $Enums.UserRole;
     },
   ): Promise<User> {
     return await this.prismaService.user.update({
       where: { id },
       data: {
         name: input.name,
-        role: input.role
+        role: input.role,
       },
     });
   }

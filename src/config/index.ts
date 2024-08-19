@@ -1,3 +1,4 @@
+import { OAuthConfig } from 'src/config/interfaces/oauth-config.interface';
 import { IConfig } from './interfaces/config.interface';
 import { parseRedisUrl } from 'parse-redis-url-simple';
 
@@ -44,6 +45,16 @@ export function config(): IConfig {
         limit: parseInt(process.env.THROTTLE_LIMIT, 10),
       },
     ],
+    oauth: {
+      GOOGLE: {
+        id: process.env.OAUTH_GOOGLE_CLIENT_ID,
+        secret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
+      },
+      GITHUB: {
+        id: process.env.OAUTH_GITHUB_CLIENT_ID,
+        secret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
+      },
+    },
     testing,
   };
 }

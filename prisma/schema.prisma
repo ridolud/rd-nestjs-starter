@@ -21,6 +21,7 @@ model User {
   password String
   confirmed Boolean @default(false)
   role  UserRole
+  oauthProviders OAuthUserProvider[]
 
   @@map("users")
 }
@@ -28,4 +29,14 @@ model User {
 enum UserRole {
   USER
   ADMIN
+}
+
+model OAuthUserProvider {
+  provider String
+  email String 
+  user User @relation(fields: [email], references: [email], onDelete: Cascade) 
+  createdAt DateTime @default(now())
+
+  @@unique([provider, email])
+  @@map("oauth_user_providers")
 }

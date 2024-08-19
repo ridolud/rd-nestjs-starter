@@ -8,7 +8,7 @@ import { hash } from 'bcrypt';
 import { Cache } from 'cache-manager';
 import { isUUID, isJWT } from 'class-validator';
 import { randomUUID } from 'crypto';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from 'src/auth/services/auth.service';
 import { config } from 'src/config';
 import { IRefreshToken } from 'src/jwt/interfaces/refresh-token.interface';
 import { JwtModule } from 'src/jwt/jwt.module';
@@ -66,7 +66,7 @@ describe('AuthService', () => {
     email: faker.internet.email(),
     createdAt: new Date(),
     confirmed: true,
-    role: $Enums.UserRole.USER
+    role: $Enums.UserRole.USER,
   };
 
   it('should be defined', () => {
